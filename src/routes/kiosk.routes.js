@@ -5,3 +5,5 @@ router.post("/register", controller.registerKiosk)
 router.get("/approve", controller.approveKiosk)
 
 module.exports = router
+
+
