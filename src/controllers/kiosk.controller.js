@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs")
-const { v4: uuid } = require("uuid")
 const Kiosk = require("../models/Kiosk")
 const { sendApprovalMail } = require("../services/email.service")
 
@@ -19,9 +18,24 @@ exports.registerKiosk = async (req, res) => {
     if (!username || !password || !ownerEmail)
       return res.status(400).json({ error: "Missing fields" })
 
+    // Check if username already exists
+    const existing = await Kiosk.findOne({ username })
+    if (existing) {
+      return res.status(400).json({ error: "Username already taken" })
+    }
+
+    // Validate username format
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ 
+        error: "Username can only contain letters, numbers, dash and underscore" 
+      })
+    }
+
     const passwordHash = await bcrypt.hash(password, 10)
-    const kioskId = uuid()
-    const token = uuid()
+    
+    // Use username as kioskId
+    const kioskId = username
 
     await Kiosk.create({
       kioskId,
@@ -35,13 +49,15 @@ exports.registerKiosk = async (req, res) => {
       status: "PENDING"
     })
 
-    await sendApprovalMail({ ownerEmail, kioskId, token })
+    await sendApprovalMail({ ownerEmail, kioskId, username })
 
     res.json({
       success: true,
-      message: "Registration submitted. Waiting for approval."
+      message: "Registration submitted. Waiting for approval.",
+      kioskId: username
     })
   } catch (e) {
+    console.error("Registration error:", e)
     res.status(500).json({ error: e.message })
   }
 }
@@ -55,5 +71,5 @@ exports.approveKiosk = async (req, res) => {
   kiosk.status = "ACTIVE"
   await kiosk.save()
 
-  res.send("Kiosk approved successfully. You can login now.")
+  res.send(`Kiosk "${kiosk.username}" approved successfully. You can login now.`)
 }
