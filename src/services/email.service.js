@@ -18,7 +18,6 @@ exports.sendApprovalMail = async ({ ownerEmail, kioskId, token }) => {
       Subject: { Data: "Approve kiosk" },
       Body: {
         Html: {
-          username,
           Data: `<h3>Approve kiosk</h3><a href="${url}">APPROVE</a>`
         }
       }
