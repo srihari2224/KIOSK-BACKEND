@@ -15,8 +15,16 @@ exports.registerKiosk = async (req, res) => {
       deviceId
     } = req.body
 
-    if (!username || !password || !ownerEmail)
+    if (!username || !password || !ownerEmail || !lat || !lng)
       return res.status(400).json({ error: "Missing fields" })
+
+    // Validate latitude and longitude
+    const latitude = parseFloat(lat)
+    const longitude = parseFloat(lng)
+    
+    if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      return res.status(400).json({ error: "Invalid latitude or longitude" })
+    }
 
     // Check if username already exists
     const existing = await Kiosk.findOne({ username })
@@ -43,7 +51,7 @@ exports.registerKiosk = async (req, res) => {
       passwordHash,
       locationName,
       address,
-      geo: { lat, lng },
+      geo: { lat: latitude, lng: longitude },
       ownerEmail,
       deviceId,
       status: "PENDING"
