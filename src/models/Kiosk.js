@@ -6,6 +6,13 @@ const kioskSchema = new mongoose.Schema(
     username: { type: String, unique: true },
     passwordHash: String,
 
+    // Extended registration fields
+    kioskType: { type: String, enum: ["SX-Series", "DX-Series"] },
+    serviceType: { type: String, enum: ["KSS", "MKS"] },
+    ipAddress: String,
+    ownerName: String,
+    ownerPhone: String,
+
     locationName: String,
     address: String,
     geo: {
