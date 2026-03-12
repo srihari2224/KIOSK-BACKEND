@@ -23,9 +23,30 @@ const kioskSchema = new mongoose.Schema(
     ownerEmail: String,
     deviceId: String,
 
+    bankDetails: {
+      accountName: String,
+      accountNumber: String,
+      ifscCode: String,
+      bankName: String
+    },
+
+    settlements: [{
+      amount: Number,
+      transactionId: String,
+      proofImage: String, // base64
+      fromDate: Date,
+      toDate: Date,
+      status: {
+        type: String,
+        enum: ["PENDING", "APPROVED", "REJECTED"],
+        default: "PENDING"
+      },
+      createdAt: { type: Date, default: Date.now }
+    }],
+
     status: {
       type: String,
-      enum: ["PENDING", "ACTIVE", "BLOCKED"],
+      enum: ["PENDING", "ACTIVE", "BLOCKED", "REJECTED"],
       default: "PENDING"
     }
   },
