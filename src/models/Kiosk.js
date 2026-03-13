@@ -10,6 +10,10 @@ const kioskSchema = new mongoose.Schema(
     kioskType: { type: String, enum: ["SX-Series", "DX-Series"] },
     serviceType: { type: String, enum: ["KSS", "MKS"] },
     ipAddress: String,
+    cpuUsername: String,
+    cpuPassword: String,
+    printer1Capacity: Number,
+    printer2Capacity: Number,
     ownerName: String,
     ownerPhone: String,
 
