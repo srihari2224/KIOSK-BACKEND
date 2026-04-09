@@ -1,0 +1,19 @@
+# ── Dependencies ───────────────────────────────────────────────
+node_modules
+
+# ── Git ────────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Logs and temp files ────────────────────────────────────────
+*.log
+logs/
+
+# ── Environment secrets (passed via compose env_file) ─────────
+.env
+
+# ── Editor / OS noise ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode
+.idea

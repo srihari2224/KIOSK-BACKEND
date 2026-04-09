@@ -202,6 +202,116 @@ exports.approveSettlement = async (req, res) => {
   }
 }
 
+// ── Delete request ─────────────────────────────────────────────────────────────
+exports.requestDelete = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const kiosk = await Kiosk.findOne({ kioskId })
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    kiosk.status = "DELETE_PENDING"
+    await kiosk.save()
+    res.json({ success: true, message: "Deletion request submitted" })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+exports.confirmDelete = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    await Kiosk.findOneAndDelete({ kioskId })
+    res.json({ success: true, message: "Kiosk deleted" })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+// ── Pricing ────────────────────────────────────────────────────────────────────
+exports.updatePricing = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const { colorRate, bwSingleRate, bwDuplexRate } = req.body
+    const kiosk = await Kiosk.findOne({ kioskId })
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    kiosk.pricing = {
+      colorRate:    colorRate    !== undefined ? Number(colorRate)    : (kiosk.pricing?.colorRate    ?? 8),
+      bwSingleRate: bwSingleRate !== undefined ? Number(bwSingleRate) : (kiosk.pricing?.bwSingleRate ?? 2),
+      bwDuplexRate: bwDuplexRate !== undefined ? Number(bwDuplexRate) : (kiosk.pricing?.bwDuplexRate ?? 3),
+    }
+    await kiosk.save()
+    res.json({ success: true, pricing: kiosk.pricing })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+exports.getPricing = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const kiosk = await Kiosk.findOne({ kioskId }, "pricing")
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    res.json({
+      success: true,
+      pricing: {
+        colorRate:    kiosk.pricing?.colorRate    ?? 8,
+        bwSingleRate: kiosk.pricing?.bwSingleRate ?? 2,
+        bwDuplexRate: kiosk.pricing?.bwDuplexRate ?? 3,
+      }
+    })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+// ── Paper & Printer ────────────────────────────────────────────────────────────
+exports.updatePaper = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const { printer1Paper, printer2Paper } = req.body
+    const kiosk = await Kiosk.findOne({ kioskId })
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    if (printer1Paper !== undefined) kiosk.printer1Paper = Number(printer1Paper)
+    if (printer2Paper !== undefined) kiosk.printer2Paper = Number(printer2Paper)
+    await kiosk.save()
+    res.json({ success: true, printer1Paper: kiosk.printer1Paper, printer2Paper: kiosk.printer2Paper })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+exports.resetPaper = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const { printer } = req.body
+    const kiosk = await Kiosk.findOne({ kioskId })
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    const cap1 = kiosk.printer1Capacity || 250
+    const cap2 = kiosk.printer2Capacity || 250
+    if (!printer || printer === "all" || printer === "printer1") kiosk.printer1Paper = cap1
+    if (!printer || printer === "all" || printer === "printer2") kiosk.printer2Paper = cap2
+    await kiosk.save()
+    res.json({ success: true, printer1Paper: kiosk.printer1Paper, printer2Paper: kiosk.printer2Paper })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
+exports.updatePrinterConfig = async (req, res) => {
+  try {
+    const { kioskId } = req.params
+    const { kioskVariant, printer1, printer2 } = req.body
+    const kiosk = await Kiosk.findOne({ kioskId })
+    if (!kiosk) return res.status(404).json({ error: "Kiosk not found" })
+    if (kioskVariant) kiosk.kioskVariant = kioskVariant
+    if (printer1 !== undefined) kiosk.printer1 = printer1
+    if (printer2 !== undefined) kiosk.printer2 = printer2
+    await kiosk.save()
+    res.json({ success: true, kioskVariant: kiosk.kioskVariant, printer1: kiosk.printer1, printer2: kiosk.printer2 })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+}
+
 exports.downloadCertificate = async (req, res) => {
   try {
     const { generateKioskCertificate } = require("../services/pdf.service")

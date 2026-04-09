@@ -50,8 +50,24 @@ const kioskSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["PENDING", "ACTIVE", "BLOCKED", "REJECTED"],
+      enum: ["PENDING", "ACTIVE", "BLOCKED", "REJECTED", "DELETE_PENDING"],
       default: "PENDING"
+    },
+
+    // Printer routing: SX = single printer, DX = dual printer
+    kioskVariant: { type: String, enum: ["SX", "DX"], default: "SX" },
+    printer1: { type: String, default: "" },
+    printer2: { type: String, default: "" },
+
+    // Paper tracking (sheets remaining)
+    printer1Paper: { type: Number, default: 250 },
+    printer2Paper: { type: Number, default: 250 },
+
+    // Per-kiosk pricing (₹ per page/sheet)
+    pricing: {
+      colorRate:    { type: Number, default: 8 },
+      bwSingleRate: { type: Number, default: 2 },
+      bwDuplexRate: { type: Number, default: 3 }
     }
   },
   { timestamps: true }
